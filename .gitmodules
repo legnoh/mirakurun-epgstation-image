@@ -1,0 +1,3 @@
+[submodule "docker-mirakurun-epgstation"]
+	path = docker-mirakurun-epgstation
+	url = https://github.com/l3tnun/docker-mirakurun-epgstation.git
