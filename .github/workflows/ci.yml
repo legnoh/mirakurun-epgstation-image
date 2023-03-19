@@ -6,8 +6,14 @@ on:
   workflow_dispatch:
 
 jobs:
-  docker-push:
+  starter:
     runs-on: ubuntu-latest
+    steps:
+      - run: ":"
+
+  docker-debian:
+    runs-on: macos-latest
+    needs: starter
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -30,17 +36,39 @@ jobs:
       - name: Build and push(debian)
         uses: docker/build-push-action@v4
         with:
-          context: docker-mirakurun-epgstation
-          file: debian.Dockerfile
+          context: docker-mirakurun-epgstation/epgstation
+          file: docker-mirakurun-epgstation/epgstation/debian.Dockerfile
           platforms: linux/amd64,linux/arm64,linux/arm/v7
-          push: false
+          push: true
           tags: ${{ secrets.DOCKER_HUB_USERNAME }}/epgstation:debian-latest
+
+  docker-alpine:
+    runs-on: macos-latest
+    needs: starter
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          submodules: true
+          fetch-depth: 0
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v2
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKER_HUB_USERNAME }}
+          password: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
 
       - name: Build and push(alpine)
         uses: docker/build-push-action@v4
         with:
-          context: docker-mirakurun-epgstation
-          file: alpine.Dockerfile
+          context: docker-mirakurun-epgstation/epgstation
+          file: docker-mirakurun-epgstation/epgstation/alpine.Dockerfile
           platforms: linux/amd64,linux/arm64,linux/arm/v7
-          push: false
+          push: true
           tags: ${{ secrets.DOCKER_HUB_USERNAME }}/epgstation:alpine-latest
